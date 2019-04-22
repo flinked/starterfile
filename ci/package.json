@@ -1,0 +1,19 @@
+{
+  "name": "gulp-test",
+  "version": "1.0.0",
+  "license": "MIT",
+  "scripts": {
+    "front": " node sh/notify/front.js && cd wp-content/themes/flinked/builder && gulp build && cd ../../../../sh && Make deployFront",
+    "back": "cd sh && Make deploy && cd ../",
+    "complete": "node sh/notify/complete.js && cd wp-content/themes/flinked/builder && gulp build && cd ../../../../sh && Make deploy && sh db.sh",
+    "db": "node sh/notify/db.js && cd sh && sh db.sh node",
+    "import": "cd sh && Make dbimport && cd ../",
+    "slack": "node sh/notify/db.js"
+  },
+  "dependencies": {
+    "gsap": "^2.0.2",
+    "moment": "^2.23.0",
+    "slack-notify": "^0.1.7",
+    "dotenv": "^7.0.0"
+  }
+}
