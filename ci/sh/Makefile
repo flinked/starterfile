@@ -8,6 +8,7 @@ domain=${PREPROD_URL}
 localDomain=${LOCAL_URL}
 themeName=flinked/
 phpServer=/usr/local/bin/
+phpLocal=/usr/bin/
 
 help: ## Affiche cette aide
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
@@ -20,7 +21,7 @@ deploy: ## Déploie une nouvelle version de l'application
 	rsync -av ../ $(ssh):$(path) \
 		--exclude Makefile \
 		--exclude sh/Makefile \
-		--exclude wp-config.php \
+		--exclude .env\
 		--exclude .git \
 		--exclude .idea \
 		--exclude .htacess \
@@ -30,7 +31,7 @@ deployFront: ## Déploie une nouvelle version de l'application
 	rsync -av ../wp-content/themes/$(themeName) $(ssh):$(path)wp-content/themes/$(themeName) \
 		--exclude Makefile \
 		--exclude sh/Makefile \
-		--exclude wp-config.php \
+		--exclude .env\
 		--exclude .git \
 		--exclude .idea \
 		--exclude wp-content/uploads \
@@ -41,7 +42,7 @@ deployFront: ## Déploie une nouvelle version de l'application
 dbdeploy: ## Envoie les données sur le serveur
 	php wp-cli.phar db export --add-drop-table dump.sql
 	rsync -av ./dump.sql $(ssh):$(path)
-	ssh $(ssh) "cd $(path); $(phpServer)php wp-cli.phar db import dump.sql; $(phpServer)php wp-cli.phar search-replace '$(localDomain)' '$(domain)'; $(phpServer)php wp-cli.phar rewrite structure '/%postname%/';"
+	ssh $(ssh) "cd $(path); $(phpServer)php wp-cli.phar db import dump.sql; $(phpServer)php wp-cli.phar search-replace '$(localDomain)' '$(domain)'; $(phpServer)php wp-cli.phar rewrite structure "/%postname%/" --hard; $(phpServer)php wp-cli.phar rewrite flush --hard;"
 	rm dump.sql
 
 dbimport: ## Récupère les données depuis le serveur
@@ -49,7 +50,7 @@ dbimport: ## Récupère les données depuis le serveur
 	rsync -av $(ssh):$(path)dump.sql ./
 	rsync -av $(ssh):$(path)wp-content/uploads/ ../wp-content/uploads/
 	ssh $(ssh) "rm $(path)dump.sql"
-	sh import.sh
+	php wp-cli.phar db import dump.sql; php wp-cli.phar search-replace '$(domain)' '$(localDomain)'; php wp-cli.phar rewrite structure "/%postname%/" --hard; php wp-cli.phar rewrite flush --hard;
 
 update:
 	php wp-cli.phar core update
