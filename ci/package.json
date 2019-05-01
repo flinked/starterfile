@@ -8,6 +8,7 @@
     "complete": "node sh/notify/complete.js && cd wp-content/themes/flinked/builder && gulp build && cd ../../../../sh && Make deploy && Make dbdeploy",
     "db": "node sh/notify/db.js && cd sh && Make dbdeploy",
     "import": "cd sh && Make dbimport && cd ../",
+    "initCi": "node sh/notify/complete.js && cd wp-content/themes/flinked/builder && gulp build && cd ../../../../sh && Make deploy",
     "slack": "node sh/notify/db.js"
   },
   "dependencies": {
